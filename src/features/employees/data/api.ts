@@ -84,7 +84,18 @@ export type EmployeeInput = {
 }
 
 export async function createEmployee(input: EmployeeInput) {
-    // 1. Create the employee record
+    let userId: string | null = null
+
+    // 1. If login requested, create auth account FIRST (validates email uniqueness)
+    if (input.createLogin) {
+        userId = await adminCreateAuthUser(
+            input.email,
+            input.fullName,
+            input.role
+        )
+    }
+
+    // 2. Insert the employee record (validates employee_code/email uniqueness)
     const { data: employee, error } = await supabase
         .from('employees')
         .insert({
@@ -94,25 +105,18 @@ export async function createEmployee(input: EmployeeInput) {
             department_id: input.departmentId,
             position: input.position,
             status: input.status,
+            profile_id: userId,
         })
         .select('id')
         .single()
 
-    if (error) throw error
-
-    // 2. Optionally create an auth account with default password
-    if (input.createLogin) {
-        const userId = await adminCreateAuthUser(
-            input.email,
-            input.fullName,
-            input.role
-        )
-
-        // Link profile to employee
-        await supabase
-            .from('employees')
-            .update({ profile_id: userId })
-            .eq('id', employee.id)
+    if (error) {
+        // Rollback: delete the auth user we just created
+        if (userId) {
+            const { supabaseAdmin } = await import('@/lib/supabase-admin')
+            await supabaseAdmin?.auth.admin.deleteUser(userId)
+        }
+        throw error
     }
 
     return employee
