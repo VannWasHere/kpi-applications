@@ -1,19 +1,10 @@
 import {
-  Bell,
-  Bug,
   ClipboardList,
-  FileX,
   History,
   LayoutDashboard,
-  Lock,
-  Monitor,
-  Palette,
-  ServerOff,
   Settings,
   Target,
-  UserCog,
   Users,
-  Wrench,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -58,69 +49,12 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Pages',
-      items: [
-        {
-          title: 'Errors',
-          icon: Bug,
-          items: [
-            {
-              title: 'Unauthorized',
-              url: '/errors/unauthorized',
-              icon: Lock,
-            },
-            {
-              title: 'Forbidden',
-              url: '/errors/forbidden',
-              icon: Lock,
-            },
-            {
-              title: 'Not Found',
-              url: '/errors/not-found',
-              icon: FileX,
-            },
-            {
-              title: 'Internal Server Error',
-              url: '/errors/internal-server-error',
-              icon: ServerOff,
-            },
-          ],
-        },
-      ],
-    },
-    {
       title: 'Other',
       items: [
         {
           title: 'Settings',
+          url: '/settings',
           icon: Settings,
-          items: [
-            {
-              title: 'Profile',
-              url: '/settings',
-              icon: UserCog,
-            },
-            {
-              title: 'Account',
-              url: '/settings/account',
-              icon: Wrench,
-            },
-            {
-              title: 'Appearance',
-              url: '/settings/appearance',
-              icon: Palette,
-            },
-            {
-              title: 'Notifications',
-              url: '/settings/notifications',
-              icon: Bell,
-            },
-            {
-              title: 'Display',
-              url: '/settings/display',
-              icon: Monitor,
-            },
-          ],
         },
       ],
     },
