@@ -67,7 +67,15 @@ export function EmployeeCombobox({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList>
+          <CommandList
+            className='max-h-60 overscroll-contain'
+            onWheel={(e) => {
+              // The parent Dialog locks page scroll (react-remove-scroll),
+              // which also swallows wheel events in this portaled popover.
+              // Manually scroll the list so the mouse wheel works.
+              e.currentTarget.scrollTop += e.deltaY
+            }}
+          >
             {isLoading && (
               <div className='flex items-center justify-center py-6'>
                 <Loader2 className='h-4 w-4 animate-spin' />
