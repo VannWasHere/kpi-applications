@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Loader2, Users, Building2, UserPlus, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { useDepartments, useEmployees } from '@/features/employees/data/hooks'
+import { useDepartments } from '@/features/employees/data/hooks'
+import { searchEmployees } from '@/features/employees/data/api'
+import { EmployeeCombobox } from '@/features/employees/components/employee-combobox'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,17 +38,13 @@ export function KpisAssignDialog({
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>()
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>()
 
-  const { data: employees, isLoading: isLoadingEmployees } = useEmployees()
   const { data: departments, isLoading: isLoadingDepartments } = useDepartments()
   const { data: assignments, isLoading: isLoadingAssignments } =
     useKpiAssignments(currentRow.id)
   const assignKpi = useAssignKpi()
   const unassignKpi = useUnassignKpi(currentRow.id)
 
-  const assignedIds = new Set((assignments ?? []).map((a) => a.employeeId))
-  const availableEmployees = (employees ?? []).filter(
-    (e) => !assignedIds.has(e.id) && e.status === 'active'
-  )
+  const assignedIds = (assignments ?? []).map((a) => a.employeeId)
 
   async function handleAssignIndividual() {
     if (!selectedEmployeeId) return
@@ -64,24 +62,27 @@ export function KpisAssignDialog({
 
   async function handleAssignDepartment() {
     if (!selectedDepartmentId) return
-    const deptEmployees = (employees ?? []).filter(
-      (e) =>
-        e.departmentId === selectedDepartmentId &&
-        e.status === 'active' &&
-        !assignedIds.has(e.id)
-    )
-    if (deptEmployees.length === 0) {
-      toast.info('All active employees in this department are already assigned.')
-      return
-    }
     try {
+      // Fetch active employees from this department not yet assigned
+      const deptEmployees = await searchEmployees('', {
+        excludeIds: assignedIds,
+        activeOnly: true,
+        limit: 500,
+      })
+      const filtered = deptEmployees.filter(
+        (e) => e.departmentId === selectedDepartmentId
+      )
+      if (filtered.length === 0) {
+        toast.info('All active employees in this department are already assigned.')
+        return
+      }
       await assignKpi.mutateAsync({
         kpiId: currentRow.id,
-        employeeIds: deptEmployees.map((e) => e.id),
+        employeeIds: filtered.map((e) => e.id),
       })
       setSelectedDepartmentId(undefined)
       toast.success(
-        `${deptEmployees.length} employee${deptEmployees.length > 1 ? 's' : ''} assigned from department.`
+        `${filtered.length} employee${filtered.length > 1 ? 's' : ''} assigned from department.`
       )
     } catch (err) {
       toast.error(parseSupabaseError(err).message)
@@ -89,14 +90,16 @@ export function KpisAssignDialog({
   }
 
   async function handleAssignAll() {
-    const unassigned = (employees ?? []).filter(
-      (e) => e.status === 'active' && !assignedIds.has(e.id)
-    )
-    if (unassigned.length === 0) {
-      toast.info('All active employees are already assigned to this KPI.')
-      return
-    }
     try {
+      const unassigned = await searchEmployees('', {
+        excludeIds: assignedIds,
+        activeOnly: true,
+        limit: 500,
+      })
+      if (unassigned.length === 0) {
+        toast.info('All active employees are already assigned to this KPI.')
+        return
+      }
       await assignKpi.mutateAsync({
         kpiId: currentRow.id,
         employeeIds: unassigned.map((e) => e.id),
@@ -161,16 +164,11 @@ export function KpisAssignDialog({
         {mode === 'individual' && (
           <div className='flex items-end gap-2'>
             <div className='flex-1'>
-              <SelectDropdown
-                defaultValue={selectedEmployeeId}
+              <EmployeeCombobox
+                value={selectedEmployeeId}
                 onValueChange={setSelectedEmployeeId}
-                isControlled
-                isPending={isLoadingEmployees}
-                placeholder='Select an employee'
-                items={availableEmployees.map((e) => ({
-                  label: `${e.fullName} (${e.employeeCode})`,
-                  value: e.id,
-                }))}
+                excludeIds={assignedIds}
+                placeholder='Search employee to assign...'
               />
             </div>
             <Button
@@ -217,13 +215,12 @@ export function KpisAssignDialog({
                 Assign to all active employees
               </p>
               <p className='text-xs text-muted-foreground'>
-                {availableEmployees.length} employee
-                {availableEmployees.length !== 1 ? 's' : ''} not yet assigned
+                Employees already assigned will be skipped.
               </p>
             </div>
             <Button
               onClick={handleAssignAll}
-              disabled={availableEmployees.length === 0 || assignKpi.isPending}
+              disabled={assignKpi.isPending}
             >
               {assignKpi.isPending && <Loader2 className='animate-spin' />}
               Assign All

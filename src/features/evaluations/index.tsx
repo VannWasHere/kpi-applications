@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AlertCircle, History } from 'lucide-react'
-import { useCurrentEmployee, useEmployees } from '@/features/employees/data/hooks'
+import { useCurrentEmployee } from '@/features/employees/data/hooks'
 import { useAuthStore } from '@/stores/auth-store'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -21,7 +21,6 @@ export function Evaluations() {
   const isAdmin = profile?.role === 'admin'
   const [filters, setFilters] = useState<EvaluationFiltersValue>({})
 
-  const { data: employees } = useEmployees()
   const { data: currentEmployee } = useCurrentEmployee(
     isAdmin ? undefined : profile?.id
   )
@@ -59,7 +58,6 @@ export function Evaluations() {
           <EvaluationsFilters
             value={filters}
             onChange={setFilters}
-            employees={employees ?? []}
           />
         )}
 

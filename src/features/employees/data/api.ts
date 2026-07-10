@@ -61,6 +61,32 @@ export async function getEmployeeByProfileId(
     return data ? mapEmployee(data as unknown as EmployeeRow) : null
 }
 
+export async function searchEmployees(
+    query: string,
+    options?: { excludeIds?: string[]; activeOnly?: boolean; limit?: number }
+): Promise<Employee[]> {
+    const { excludeIds = [], activeOnly = true, limit = 20 } = options ?? {}
+
+    let q = supabase
+        .from('employees')
+        .select(
+            'id, profile_id, employee_code, full_name, email, department_id, position, status, created_at, updated_at, departments(name), profiles(role)'
+        )
+        .order('full_name', { ascending: true })
+        .limit(limit)
+
+    if (activeOnly) q = q.eq('status', 'active')
+    if (query.trim()) q = q.or(`full_name.ilike.%${query}%,employee_code.ilike.%${query}%,email.ilike.%${query}%`)
+    if (excludeIds.length > 0) {
+        // Supabase "not in" filter
+        q = q.not('id', 'in', `(${excludeIds.join(',')})`)
+    }
+
+    const { data, error } = await q
+    if (error) throw error
+    return ((data ?? []) as unknown as EmployeeRow[]).map(mapEmployee)
+}
+
 export async function listDepartments(): Promise<Department[]> {
     const { data, error } = await supabase
         .from('departments')
