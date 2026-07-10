@@ -17,8 +17,8 @@ export function EmployeePerformanceList({ data }: EmployeePerformanceListProps) 
 
   return (
     <ul className='space-y-3'>
-      {data.map((item) => (
-        <li key={item.employeeName} className='flex items-center justify-between gap-3'>
+      {data.map((item, index) => (
+        <li key={`${item.employeeName}-${index}`} className='flex items-center justify-between gap-3'>
           <div className='min-w-0 flex-1'>
             <div className='mb-1 truncate text-xs text-muted-foreground'>
               {item.employeeName}
