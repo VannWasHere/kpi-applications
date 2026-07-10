@@ -1,4 +1,3 @@
-import { clearCookies } from '@/test-utils/cookies'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 async function importAuthStore() {
@@ -6,71 +5,82 @@ async function importAuthStore() {
   return useAuthStore
 }
 
-const sampleUser = {
-  accountNo: 'ACC-1',
+const sampleProfile = {
+  id: 'user-1',
   email: 'user@example.com',
-  role: ['user'],
-  exp: 1_700_000_000,
+  fullName: 'Test User',
+  role: 'karyawan' as const,
+  avatarUrl: null,
 }
+
+const sampleSession = {
+  access_token: 'token-abc',
+  refresh_token: 'refresh-abc',
+  expires_in: 3600,
+  token_type: 'bearer',
+  user: { id: 'user-1', email: 'user@example.com' },
+} as unknown as import('@supabase/supabase-js').Session
 
 describe('useAuthStore', () => {
   beforeEach(() => {
-    clearCookies()
     vi.resetModules()
   })
 
-  it('starts with an empty access token when nothing is persisted', async () => {
+  it('starts with no session, user, or profile, and isLoading true', async () => {
     const useAuthStore = await importAuthStore()
 
-    expect(useAuthStore.getState().auth.accessToken).toBe('')
+    expect(useAuthStore.getState().auth.session).toBeNull()
+    expect(useAuthStore.getState().auth.user).toBeNull()
+    expect(useAuthStore.getState().auth.profile).toBeNull()
+    expect(useAuthStore.getState().auth.isLoading).toBe(true)
+  })
+
+  it('setSession updates both session and derived user', async () => {
+    const useAuthStore = await importAuthStore()
+
+    useAuthStore.getState().auth.setSession(sampleSession)
+
+    expect(useAuthStore.getState().auth.session).toEqual(sampleSession)
+    expect(useAuthStore.getState().auth.user).toEqual(sampleSession.user)
+  })
+
+  it('setSession(null) clears both session and user', async () => {
+    const useAuthStore = await importAuthStore()
+    useAuthStore.getState().auth.setSession(sampleSession)
+
+    useAuthStore.getState().auth.setSession(null)
+
+    expect(useAuthStore.getState().auth.session).toBeNull()
     expect(useAuthStore.getState().auth.user).toBeNull()
   })
 
-  it('persists access token so a new store instance reads it back', async () => {
+  it('updates the profile via setProfile', async () => {
     const useAuthStore = await importAuthStore()
-    useAuthStore.getState().auth.setAccessToken('session-token')
 
-    vi.resetModules()
-    const useAuthStoreAfterReload = await importAuthStore()
+    useAuthStore.getState().auth.setProfile(sampleProfile)
 
-    expect(useAuthStoreAfterReload.getState().auth.accessToken).toBe(
-      'session-token'
-    )
+    expect(useAuthStore.getState().auth.profile).toEqual(sampleProfile)
   })
 
-  it('clears persisted access token when resetAccessToken is used', async () => {
+  it('setLoading toggles isLoading', async () => {
     const useAuthStore = await importAuthStore()
-    useAuthStore.getState().auth.setAccessToken('to-clear')
-    useAuthStore.getState().auth.resetAccessToken()
 
-    vi.resetModules()
-    const useAuthStoreAfterReload = await importAuthStore()
+    useAuthStore.getState().auth.setLoading(false)
+    expect(useAuthStore.getState().auth.isLoading).toBe(false)
 
-    expect(useAuthStoreAfterReload.getState().auth.accessToken).toBe('')
+    useAuthStore.getState().auth.setLoading(true)
+    expect(useAuthStore.getState().auth.isLoading).toBe(true)
   })
 
-  it('updates the signed-in user via setUser', async () => {
+  it('reset clears session, user, and profile', async () => {
     const useAuthStore = await importAuthStore()
-
-    useAuthStore.getState().auth.setUser({ ...sampleUser })
-
-    expect(useAuthStore.getState().auth.user).toEqual(sampleUser)
-  })
-
-  it('reset clears user and access token and drops persistence', async () => {
-    const useAuthStore = await importAuthStore()
-    useAuthStore.getState().auth.setAccessToken('will-be-cleared')
-    useAuthStore.getState().auth.setUser({ ...sampleUser })
+    useAuthStore.getState().auth.setSession(sampleSession)
+    useAuthStore.getState().auth.setProfile(sampleProfile)
 
     useAuthStore.getState().auth.reset()
 
+    expect(useAuthStore.getState().auth.session).toBeNull()
     expect(useAuthStore.getState().auth.user).toBeNull()
-    expect(useAuthStore.getState().auth.accessToken).toBe('')
-
-    vi.resetModules()
-    const useAuthStoreAfterReload = await importAuthStore()
-
-    expect(useAuthStoreAfterReload.getState().auth.user).toBeNull()
-    expect(useAuthStoreAfterReload.getState().auth.accessToken).toBe('')
+    expect(useAuthStore.getState().auth.profile).toBeNull()
   })
 })

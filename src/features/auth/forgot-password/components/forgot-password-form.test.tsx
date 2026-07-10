@@ -3,16 +3,12 @@ import { render, type RenderResult } from 'vitest-browser-react'
 import { userEvent, type Locator } from 'vitest/browser'
 import { ForgotPasswordForm } from './forgot-password-form'
 
-const navigateMock = vi.fn()
+const mocks = vi.hoisted(() => ({
+  sendPasswordResetEmail: vi.fn(() => Promise.resolve()),
+}))
 
-vi.mock('@tanstack/react-router', async (orig) => {
-  const actual = await orig<typeof import('@tanstack/react-router')>()
-  return { ...actual, useNavigate: () => navigateMock }
-})
-
-vi.mock('@/lib/utils', async (orig) => ({
-  ...(await orig()),
-  sleep: vi.fn(() => Promise.resolve()),
+vi.mock('@/lib/auth', () => ({
+  sendPasswordResetEmail: mocks.sendPasswordResetEmail,
 }))
 
 describe('ForgotPasswordForm', () => {
@@ -40,12 +36,12 @@ describe('ForgotPasswordForm', () => {
       .toBeInTheDocument()
   })
 
-  it('resets the form and navigates to /otp on success', async () => {
+  it('sends the reset email and resets the form on success', async () => {
     await userEvent.fill(emailInput, 'a@b.com')
     await userEvent.click(continueButton)
 
     await vi.waitFor(() =>
-      expect(navigateMock).toHaveBeenCalledWith({ to: '/otp' })
+      expect(mocks.sendPasswordResetEmail).toHaveBeenCalledWith('a@b.com')
     )
 
     // Form should reset on success

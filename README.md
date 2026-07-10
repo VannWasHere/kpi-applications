@@ -1,119 +1,107 @@
-# Shadcn Admin Dashboard
+# KPI Application
 
-Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
+Employee Performance Evaluation System. Admins define KPIs, assign them to
+employees, and track automatically calculated scores and ratings. Employees
+log in to update their own KPI progress and review their evaluation history.
 
-![alt text](public/images/shadcn-admin.png)
+Built on top of the [shadcn-admin](https://github.com/satnaing/shadcn-admin)
+dashboard template (React + Vite + TanStack Router + shadcn/ui), with
+Supabase for authentication and data.
 
-[![Sponsored by Clerk](https://img.shields.io/badge/Sponsored%20by-Clerk-5b6ee1?logo=clerk)](https://go.clerk.com/GttUAaK)
+## Tech stack
 
-I've been creating dashboard UIs at work and for my personal projects. I always wanted to make a reusable collection of dashboard UI for future projects; and here it is now. While I've created a few custom components, some of the code is directly adapted from ShadcnUI examples.
-
-> This is not a starter project (template) though. I'll probably make one in the future.
+- **UI:** [shadcn/ui](https://ui.shadcn.com) (Tailwind CSS + Radix UI)
+- **Build tool:** [Vite](https://vitejs.dev/)
+- **Routing:** [TanStack Router](https://tanstack.com/router/latest)
+- **Data:** [Supabase](https://supabase.com) (Postgres, Auth, Row Level Security)
+- **Server state:** [TanStack Query](https://tanstack.com/query/latest)
+- **Type checking:** TypeScript
+- **Linting/formatting:** ESLint & Prettier
+- **Testing:** Vitest + Playwright (browser mode)
 
 ## Features
 
-- Light/dark mode
-- Responsive
-- Accessible
-- With built-in Sidebar component
-- Global search command
-- 10+ pages
-- Extra custom components
-- RTL support
+- Supabase Authentication with persistent/"remember me" sessions
+- Role-based access (Admin / Karyawan) enforced by route guards and RLS
+- Employee management (CRUD, search, sort, pagination)
+- KPI / OKR management (create, edit, delete, assign to employees)
+- KPI progress input for employees, with automatic score calculation
+- Automatic weighted score, overall performance score, and rating
+- Admin dashboard (totals, KPI progress, department/employee performance, activity feed)
+- Employee dashboard (assigned/completed KPIs, current score, progress history, upcoming KPIs)
+- Evaluation history with admin (all employees) and employee (own) views, filterable by employee/year/month
+- Light/dark mode, responsive layout, RTL support
 
-<details>
-<summary>Customized Components (click to expand)</summary>
+## Getting started
 
-This project uses Shadcn UI components, but some have been slightly modified for better RTL (Right-to-Left) support and other improvements. These customized components differ from the original Shadcn UI versions.
-
-If you want to update components using the Shadcn CLI (e.g., `npx shadcn@latest add <component>`), it's generally safe for non-customized components. For the listed customized ones, you may need to manually merge changes to preserve the project's modifications and avoid overwriting RTL support or other updates.
-
-> If you don't require RTL support, you can safely update the 'RTL Updated Components' via the Shadcn CLI, as these changes are primarily for RTL compatibility. The 'Modified Components' may have other customizations to consider.
-
-### Modified Components
-
-- scroll-area
-- sonner
-- separator
-
-### RTL Updated Components
-
-- alert-dialog
-- calendar
-- command
-- dialog
-- dropdown-menu
-- select
-- table
-- sheet
-- sidebar
-- switch
-
-**Notes:**
-
-- **Modified Components**: These have general updates, potentially including RTL adjustments.
-- **RTL Updated Components**: These have specific changes for RTL language support (e.g., layout, positioning).
-- For implementation details, check the source files in `src/components/ui/`.
-- All other Shadcn UI components in the project are standard and can be safely updated via the CLI.
-
-</details>
-
-## Tech Stack
-
-**UI:** [ShadcnUI](https://ui.shadcn.com) (TailwindCSS + RadixUI)
-
-**Build Tool:** [Vite](https://vitejs.dev/)
-
-**Routing:** [TanStack Router](https://tanstack.com/router/latest)
-
-**Type Checking:** [TypeScript](https://www.typescriptlang.org/)
-
-**Linting/Formatting:** [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/)
-
-**Icons:** [Lucide Icons](https://lucide.dev/icons/), [Tabler Icons](https://tabler.io/icons) (Brand icons only)
-
-**Auth (partial):** [Clerk](https://go.clerk.com/GttUAaK)
-
-## Run Locally
-
-Clone the project
+### 1. Install dependencies
 
 ```bash
-  git clone https://github.com/satnaing/shadcn-admin.git
+pnpm install
 ```
 
-Go to the project directory
+### 2. Configure environment variables
+
+Copy `.env.example` to `.env` and fill in your Supabase project's URL and
+anon key (Project Settings → API in the Supabase dashboard):
 
 ```bash
-  cd shadcn-admin
+cp .env.example .env
 ```
 
-Install dependencies
+```dotenv
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+DATABASE_URL=postgresql://postgres:<password>@db.your-project.supabase.co:5432/postgres
+```
+
+`DATABASE_URL` is only needed locally if you plan to run the SQL migrations
+via `psql` (see below); it is never read by the frontend build. `.env` is
+gitignored — never commit real credentials.
+
+### 3. Set up the database
+
+Run the SQL migrations in `supabase/migrations/` in order (0001, 0002, 0003)
+using the Supabase SQL editor or `psql`. See `supabase/README.md` for full
+instructions, including how to create and promote the first admin user.
+
+### 4. (Optional) Deploy the employee-invite Edge Function
+
+Creating an employee with "create a login" enabled calls the
+`create-employee-account` Supabase Edge Function (see `supabase/functions/`),
+which needs the service role key and therefore must run server-side. Deploy
+it with the Supabase CLI:
 
 ```bash
-  pnpm install
+supabase functions deploy create-employee-account
 ```
 
-Start the server
+If you skip this, you can still create employee records — just uncheck
+"Create a login" and provision their Supabase Auth user manually.
+
+### 5. Run the app
 
 ```bash
-  pnpm run dev
+pnpm dev
 ```
 
-## Sponsoring this project ❤️
+## Scripts
 
-If you find this project helpful or use this in your own work, consider [sponsoring me](https://github.com/sponsors/satnaing) to support development and maintenance. You can [buy me a coffee](https://buymeacoffee.com/satnaing) as well. Don’t worry, every penny helps. Thank you! 🙏
+```bash
+pnpm dev             # start the dev server
+pnpm build           # type-check and build for production
+pnpm lint            # run ESLint
+pnpm format          # run Prettier
+pnpm test            # run the test suite (headless)
+```
 
-For questions or sponsorship inquiries, feel free to reach out at [satnaingdev@gmail.com](mailto:satnaingdev@gmail.com).
+## Deployment
 
-### Current Sponsor
-
-- [Clerk](https://go.clerk.com/GttUAaK) - authentication and user management for the modern web
-
-## Author
-
-Crafted with 🤍 by [@satnaing](https://github.com/satnaing)
+The app is a static Vite build (`pnpm build` outputs to `dist/`) and can be
+deployed to any static host (Netlify config is included via `netlify.toml`).
+Set the same `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` environment
+variables in your hosting provider's dashboard before deploying.
 
 ## License
 
-Licensed under the [MIT License](https://choosealicense.com/licenses/mit/)
+Licensed under the [MIT License](https://choosealicense.com/licenses/mit/).

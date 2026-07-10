@@ -24,6 +24,12 @@ export default defineConfig({
   test: {
     silent: 'passed-only',
     unstubEnvs: true,
+    env: {
+      // Dummy values so src/lib/supabase.ts can initialize during tests.
+      // Tests that need Supabase behavior mock '@/lib/auth' or '@/lib/supabase' directly.
+      VITE_SUPABASE_URL: 'https://test.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+    },
     browser: {
       enabled: true,
       provider: playwright(),

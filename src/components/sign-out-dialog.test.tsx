@@ -3,22 +3,28 @@ import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { SignOutDialog } from './sign-out-dialog'
 
-const navigate = vi.fn()
-const reset = vi.fn()
-
 const MOCK_HREF = 'https://app.test/dashboard?tab=1'
 
+const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  reset: vi.fn(),
+  signOut: vi.fn(() => Promise.resolve()),
+}))
+
 vi.mock('@/stores/auth-store', () => ({
-  useAuthStore: () => ({
-    auth: { reset },
-  }),
+  useAuthStore: (selector: (state: { auth: { reset: () => void } }) => unknown) =>
+    selector({ auth: { reset: mocks.reset } }),
+}))
+
+vi.mock('@/lib/auth', () => ({
+  signOut: mocks.signOut,
 }))
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-router')>()
   return {
     ...actual,
-    useNavigate: () => navigate,
+    useNavigate: () => mocks.navigate,
     useLocation: () => ({ href: MOCK_HREF }),
   }
 })
@@ -26,6 +32,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 describe('SignOutDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.signOut.mockResolvedValue(undefined)
   })
 
   it('calls auth.reset and navigates to sign-in with current location as redirect', async () => {
@@ -35,8 +42,9 @@ describe('SignOutDialog', () => {
 
     await userEvent.click(getByRole('button', { name: /^Sign out$/i }))
 
-    expect(reset).toHaveBeenCalledOnce()
-    expect(navigate).toHaveBeenCalledWith({
+    await vi.waitFor(() => expect(mocks.signOut).toHaveBeenCalledOnce())
+    expect(mocks.reset).toHaveBeenCalledOnce()
+    expect(mocks.navigate).toHaveBeenCalledWith({
       to: '/sign-in',
       search: { redirect: MOCK_HREF },
       replace: true,
@@ -50,7 +58,7 @@ describe('SignOutDialog', () => {
 
     await userEvent.click(getByRole('button', { name: /^Cancel$/i }))
 
-    expect(reset).not.toHaveBeenCalled()
-    expect(navigate).not.toHaveBeenCalled()
+    expect(mocks.reset).not.toHaveBeenCalled()
+    expect(mocks.navigate).not.toHaveBeenCalled()
   })
 })

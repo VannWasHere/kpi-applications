@@ -1,53 +1,28 @@
 import {
-  Construction,
-  LayoutDashboard,
-  Monitor,
-  Bug,
-  ListTodo,
-  FileX,
-  HelpCircle,
-  Lock,
   Bell,
-  Package,
+  Bug,
+  ClipboardList,
+  FileX,
+  History,
+  LayoutDashboard,
+  Lock,
+  Monitor,
   Palette,
   ServerOff,
   Settings,
-  Wrench,
+  Target,
   UserCog,
-  UserX,
   Users,
-  MessagesSquare,
-  ShieldCheck,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
+  Wrench,
 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
   user: {
-    name: 'satnaing',
-    email: 'satnaingdev@gmail.com',
-    avatar: '/avatars/shadcn.jpg',
+    name: 'KPI Application',
+    email: '',
+    avatar: '',
   },
-  teams: [
-    {
-      name: 'Shadcn Admin',
-      logo: Command,
-      plan: 'Vite + ShadcnUI',
-    },
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-  ],
   navGroups: [
     {
       title: 'General',
@@ -58,75 +33,33 @@ export const sidebarData: SidebarData = {
           icon: LayoutDashboard,
         },
         {
-          title: 'Tasks',
-          url: '/tasks',
-          icon: ListTodo,
-        },
-        {
-          title: 'Apps',
-          url: '/apps',
-          icon: Package,
-        },
-        {
-          title: 'Chats',
-          url: '/chats',
-          badge: '3',
-          icon: MessagesSquare,
-        },
-        {
-          title: 'Users',
-          url: '/users',
+          title: 'Employees',
+          url: '/employees',
           icon: Users,
+          roles: ['admin'],
         },
         {
-          title: 'Secured by Clerk',
-          icon: ClerkLogo,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/clerk/sign-in',
-            },
-            {
-              title: 'Sign Up',
-              url: '/clerk/sign-up',
-            },
-            {
-              title: 'User Management',
-              url: '/clerk/user-management',
-            },
-          ],
+          title: 'KPI Management',
+          url: '/kpis',
+          icon: Target,
+          roles: ['admin'],
+        },
+        {
+          title: 'My KPIs',
+          url: '/my-kpis',
+          icon: ClipboardList,
+          roles: ['karyawan'],
+        },
+        {
+          title: 'Evaluation History',
+          url: '/evaluations',
+          icon: History,
         },
       ],
     },
     {
       title: 'Pages',
       items: [
-        {
-          title: 'Auth',
-          icon: ShieldCheck,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/sign-in',
-            },
-            {
-              title: 'Sign In (2 Col)',
-              url: '/sign-in-2',
-            },
-            {
-              title: 'Sign Up',
-              url: '/sign-up',
-            },
-            {
-              title: 'Forgot Password',
-              url: '/forgot-password',
-            },
-            {
-              title: 'OTP',
-              url: '/otp',
-            },
-          ],
-        },
         {
           title: 'Errors',
           icon: Bug,
@@ -139,7 +72,7 @@ export const sidebarData: SidebarData = {
             {
               title: 'Forbidden',
               url: '/errors/forbidden',
-              icon: UserX,
+              icon: Lock,
             },
             {
               title: 'Not Found',
@@ -150,11 +83,6 @@ export const sidebarData: SidebarData = {
               title: 'Internal Server Error',
               url: '/errors/internal-server-error',
               icon: ServerOff,
-            },
-            {
-              title: 'Maintenance Error',
-              url: '/errors/maintenance-error',
-              icon: Construction,
             },
           ],
         },
@@ -193,11 +121,6 @@ export const sidebarData: SidebarData = {
               icon: Monitor,
             },
           ],
-        },
-        {
-          title: 'Help Center',
-          url: '/help-center',
-          icon: HelpCircle,
         },
       ],
     },

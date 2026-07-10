@@ -6,16 +6,12 @@ type User = {
   avatar: string
 }
 
-type Team = {
-  name: string
-  logo: React.ElementType
-  plan: string
-}
-
 type BaseNavItem = {
   title: string
   badge?: string
   icon?: React.ElementType
+  /** Restrict visibility to these app roles. Omit to show to everyone. */
+  roles?: ('admin' | 'karyawan')[]
 }
 
 type NavLink = BaseNavItem & {
@@ -37,7 +33,6 @@ type NavGroup = {
 
 type SidebarData = {
   user: User
-  teams: Team[]
   navGroups: NavGroup[]
 }
 

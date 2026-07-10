@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { ArrowRight, ChevronRight, Laptop, Moon, Sun } from 'lucide-react'
 import { useSearch } from '@/context/search-provider'
 import { useTheme } from '@/context/theme-provider'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   CommandDialog,
   CommandEmpty,
@@ -19,6 +20,7 @@ export function CommandMenu() {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
+  const profile = useAuthStore((state) => state.auth.profile)
 
   const runCommand = React.useCallback(
     (command: () => unknown) => {
@@ -28,13 +30,20 @@ export function CommandMenu() {
     [setOpen]
   )
 
+  const visibleNavGroups = sidebarData.navGroups.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) => !item.roles || (profile && item.roles.includes(profile.role))
+    ),
+  }))
+
   return (
     <CommandDialog modal open={open} onOpenChange={setOpen}>
       <CommandInput placeholder='Type a command or search...' />
       <CommandList>
         <ScrollArea type='hover' className='h-72 pe-1'>
           <CommandEmpty>No results found.</CommandEmpty>
-          {sidebarData.navGroups.map((group) => (
+          {visibleNavGroups.map((group) => (
             <CommandGroup key={group.title} heading={group.title}>
               {group.items.map((navItem, i) => {
                 if (navItem.url)
