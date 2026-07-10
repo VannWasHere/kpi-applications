@@ -37,7 +37,7 @@ Supabase for authentication and data.
 ### 1. Install dependencies
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 2. Configure environment variables
@@ -82,22 +82,22 @@ If you skip this, you can still create employee records — just uncheck
 ### 5. Run the app
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ## Scripts
 
 ```bash
-pnpm dev             # start the dev server
-pnpm build           # type-check and build for production
-pnpm lint            # run ESLint
-pnpm format          # run Prettier
-pnpm test            # run the test suite (headless)
+npm run dev             # start the dev server
+npm run build           # type-check and build for production
+npm run lint            # run ESLint
+npm run format          # run Prettier
+npm test            # run the test suite (headless)
 ```
 
 ## Deployment
 
-The app is a static Vite build (`pnpm build` outputs to `dist/`) and can be
+The app is a static Vite build (`npm run build` outputs to `dist/`) and can be
 deployed to any static host (Netlify config is included via `netlify.toml`).
 Set the same `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` environment
 variables in your hosting provider's dashboard before deploying.
