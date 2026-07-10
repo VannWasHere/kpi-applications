@@ -1,3 +1,4 @@
+import { adminCreateAuthUser } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import type { Department, Employee } from './schema'
 
@@ -78,11 +79,12 @@ export type EmployeeInput = {
     position: string
     status: 'active' | 'inactive'
     role: 'admin' | 'karyawan'
-    /** Only used on create: provisions a login for the employee. */
+    /** Provisions a login with the default password (Kpi@2026). */
     createLogin?: boolean
 }
 
 export async function createEmployee(input: EmployeeInput) {
+    // 1. Create the employee record
     const { data: employee, error } = await supabase
         .from('employees')
         .insert({
@@ -98,24 +100,19 @@ export async function createEmployee(input: EmployeeInput) {
 
     if (error) throw error
 
+    // 2. Optionally create an auth account with default password
     if (input.createLogin) {
-        const { data: session } = await supabase.auth.getSession()
-        const accessToken = session.session?.access_token
-        const { error: fnError } = await supabase.functions.invoke(
-            'create-employee-account',
-            {
-                body: {
-                    employeeId: employee.id,
-                    email: input.email,
-                    fullName: input.fullName,
-                    role: input.role,
-                },
-                headers: accessToken
-                    ? { Authorization: `Bearer ${accessToken}` }
-                    : undefined,
-            }
+        const userId = await adminCreateAuthUser(
+            input.email,
+            input.fullName,
+            input.role
         )
-        if (fnError) throw fnError
+
+        // Link profile to employee
+        await supabase
+            .from('employees')
+            .update({ profile_id: userId })
+            .eq('id', employee.id)
     }
 
     return employee

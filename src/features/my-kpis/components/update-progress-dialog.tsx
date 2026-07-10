@@ -83,7 +83,7 @@ export function UpdateProgressDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='sm:max-w-xl'>
         <DialogHeader className='text-start'>
           <DialogTitle>Update Progress</DialogTitle>
           <DialogDescription>{assignment.kpiTitle}</DialogDescription>

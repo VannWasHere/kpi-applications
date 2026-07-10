@@ -1,9 +1,12 @@
 import { REMEMBER_SESSION_KEY, supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import type { AuthProfile } from '@/stores/auth-store'
 
+/** Default password assigned to new employee accounts. */
+export const DEFAULT_PASSWORD = 'Kpi@2026'
+
 /**
- * Fetches the profile row (id/email/full_name/role/avatar_url) for a
- * given Supabase Auth user id. Returns null if not found or on error.
+ * Fetches the profile row for a given Supabase Auth user id.
  */
 export async function fetchProfile(userId: string): Promise<AuthProfile | null> {
     const { data, error } = await supabase
@@ -24,8 +27,7 @@ export async function fetchProfile(userId: string): Promise<AuthProfile | null> 
 }
 
 /**
- * Signs a user in with email/password. When `remember` is false, the
- * session is stored in sessionStorage only (cleared when the tab closes).
+ * Signs a user in with email/password.
  */
 export async function signInWithPassword(
     email: string,
@@ -41,11 +43,43 @@ export async function signInWithPassword(
     return data
 }
 
-export async function sendPasswordResetEmail(email: string) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/sign-in`,
+/**
+ * Changes the current user's own password (requires being signed in).
+ */
+export async function changeOwnPassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+}
+
+/**
+ * Admin resets another user's password by their user ID (uses service_role).
+ */
+export async function adminResetPassword(userId: string, newPassword: string) {
+    if (!supabaseAdmin) throw new Error('Service role key not configured.')
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: newPassword,
     })
     if (error) throw error
+}
+
+/**
+ * Admin creates an auth account for an employee with a default password.
+ * Returns the new user ID.
+ */
+export async function adminCreateAuthUser(
+    email: string,
+    fullName: string,
+    role: 'admin' | 'karyawan'
+): Promise<string> {
+    if (!supabaseAdmin) throw new Error('Service role key not configured.')
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: DEFAULT_PASSWORD,
+        email_confirm: true,
+        user_metadata: { full_name: fullName, role },
+    })
+    if (error) throw error
+    return data.user.id
 }
 
 export async function signOut() {

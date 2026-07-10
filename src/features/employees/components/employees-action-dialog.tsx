@@ -152,7 +152,7 @@ export function EmployeesActionDialog({
         onOpenChange(state)
       }}
     >
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='sm:max-w-2xl'>
         <DialogHeader className='text-start'>
           <DialogTitle>{isEdit ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
           <DialogDescription>
@@ -291,7 +291,7 @@ export function EmployeesActionDialog({
                       />
                     </FormControl>
                     <Label htmlFor='createLogin' className='cursor-pointer text-sm font-normal'>
-                      Create a login and send a password setup email
+                      Create a login account
                     </Label>
                   </FormItem>
                 )}

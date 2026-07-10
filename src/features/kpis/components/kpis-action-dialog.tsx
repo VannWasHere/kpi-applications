@@ -122,7 +122,7 @@ export function KpisActionDialog({
         onOpenChange(state)
       }}
     >
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='sm:max-w-2xl'>
         <DialogHeader className='text-start'>
           <DialogTitle>{isEdit ? 'Edit KPI' : 'Create KPI'}</DialogTitle>
           <DialogDescription>
