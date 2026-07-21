@@ -1,3 +1,4 @@
+import { formatNumber } from '@/lib/utils'
 import { type EmployeePerformance } from '../data/api'
 
 type EmployeePerformanceListProps = {
@@ -30,7 +31,9 @@ export function EmployeePerformanceList({ data }: EmployeePerformanceListProps) 
               />
             </div>
           </div>
-          <div className='ps-2 text-xs font-medium tabular-nums'>{item.score}</div>
+          <div className='ps-2 text-xs font-medium tabular-nums'>
+            {formatNumber(item.score)}
+          </div>
         </li>
       ))}
     </ul>

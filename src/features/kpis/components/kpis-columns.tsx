@@ -1,6 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
@@ -66,14 +66,14 @@ export const kpisColumns: ColumnDef<Kpi>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Weight' />
     ),
-    cell: ({ row }) => <div>{row.getValue('weight')}%</div>,
+    cell: ({ row }) => <div>{formatNumber(row.getValue('weight'))}%</div>,
   },
   {
     accessorKey: 'target',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Target' />
     ),
-    cell: ({ row }) => <div>{row.getValue('target')}</div>,
+    cell: ({ row }) => <div>{formatNumber(row.getValue('target'))}</div>,
     enableSorting: false,
   },
   {
@@ -91,7 +91,7 @@ export const kpisColumns: ColumnDef<Kpi>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Assigned' />
     ),
-    cell: ({ row }) => <div>{row.getValue('assignedCount')}</div>,
+    cell: ({ row }) => <div>{formatNumber(row.getValue('assignedCount'))}</div>,
     enableSorting: false,
   },
   {

@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { Pencil } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 import { type MyKpiAssignment } from '@/features/kpis/data/schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -31,7 +31,7 @@ export function KpiProgressCard({ assignment, onUpdateClick }: KpiProgressCardPr
         <div>
           <CardTitle className='text-base'>{assignment.kpiTitle}</CardTitle>
           <p className='text-xs text-muted-foreground'>
-            {assignment.kpiCategory} · Weight {assignment.kpiWeight}%
+            {assignment.kpiCategory} · Weight {formatNumber(assignment.kpiWeight)}%
           </p>
         </div>
         <Badge
@@ -45,7 +45,7 @@ export function KpiProgressCard({ assignment, onUpdateClick }: KpiProgressCardPr
         <div>
           <div className='mb-1 flex items-center justify-between text-xs text-muted-foreground'>
             <span>
-              {assignment.currentValue} / {assignment.kpiTarget}
+              {formatNumber(assignment.currentValue)} / {formatNumber(assignment.kpiTarget)}
             </span>
             <span>{assignment.progressPercent}%</span>
           </div>

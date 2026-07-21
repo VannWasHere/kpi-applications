@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/number-input'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { Textarea } from '@/components/ui/textarea'
 import { parseSupabaseError } from '@/lib/supabase-error'
@@ -210,12 +211,11 @@ export function KpisActionDialog({
                   <FormItem>
                     <FormLabel>Weight (%)</FormLabel>
                     <FormControl>
-                      <Input
-                        type='number'
-                        min={1}
-                        max={100}
-                        {...field}
+                      <NumberInput
                         value={field.value as number | string}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
                       />
                     </FormControl>
                     <FormMessage />
@@ -229,12 +229,11 @@ export function KpisActionDialog({
                   <FormItem>
                     <FormLabel>Target</FormLabel>
                     <FormControl>
-                      <Input
-                        type='number'
-                        min={0.01}
-                        step='any'
-                        {...field}
+                      <NumberInput
                         value={field.value as number | string}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
                       />
                     </FormControl>
                     <FormMessage />

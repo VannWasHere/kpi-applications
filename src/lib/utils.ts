@@ -5,6 +5,65 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const THOUSANDS_SEPARATOR = '.'
+const DECIMAL_SEPARATOR = ','
+
+/**
+ * Formats a number using `.` as the thousands separator and `,` as the
+ * decimal separator, e.g. `1000000` -> `"1.000.000"`.
+ * Non-numeric values are returned unchanged (as a string).
+ */
+export function formatNumber(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === '') return ''
+  const num = typeof value === 'number' ? value : Number(value)
+  if (Number.isNaN(num)) return String(value)
+  return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num)
+}
+
+/**
+ * Parses a string produced by `formatNumber`/`formatNumberInput` (or any
+ * partially typed input using the same convention) back into a plain number.
+ */
+export function parseFormattedNumber(value: string): number {
+  if (!value) return 0
+  const isNegative = value.trim().startsWith('-')
+  const cleaned = value
+    .split(THOUSANDS_SEPARATOR)
+    .join('')
+    .replace(DECIMAL_SEPARATOR, '.')
+    .replace(/[^\d.]/g, '')
+  const num = parseFloat(cleaned)
+  if (Number.isNaN(num)) return 0
+  return isNegative ? -Math.abs(num) : num
+}
+
+/**
+ * Live-formats raw user input as they type: groups digits with `.` every
+ * three places and preserves a single `,` decimal separator, without
+ * rounding or losing in-progress input (e.g. a trailing decimal separator).
+ */
+export function formatNumberInput(raw: string): string {
+  if (!raw) return ''
+  const isNegative = raw.trim().startsWith('-')
+  let cleaned = raw.replace(/[^\d,]/g, '')
+
+  const firstComma = cleaned.indexOf(DECIMAL_SEPARATOR)
+  if (firstComma !== -1) {
+    cleaned =
+      cleaned.slice(0, firstComma + 1) +
+      cleaned.slice(firstComma + 1).replace(new RegExp(DECIMAL_SEPARATOR, 'g'), '')
+  }
+
+  const [intPart, decPart] = cleaned.split(DECIMAL_SEPARATOR)
+  const groupedInt = intPart
+    ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, THOUSANDS_SEPARATOR)
+    : ''
+  const result =
+    decPart !== undefined ? `${groupedInt}${DECIMAL_SEPARATOR}${decPart}` : groupedInt
+
+  return isNegative && result ? `-${result}` : result
+}
+
 /**
  * Generates page numbers for pagination with ellipsis
  * @param currentPage - Current page number (1-based)

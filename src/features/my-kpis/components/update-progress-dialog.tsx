@@ -23,8 +23,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/number-input'
 import { Textarea } from '@/components/ui/textarea'
+import { formatNumber } from '@/lib/utils'
 
 const formSchema = z.object({
   currentValue: z.coerce.number().min(0, 'Value cannot be negative.'),
@@ -95,7 +96,8 @@ export function UpdateProgressDialog({
             className='grid gap-4'
           >
             <p className='text-sm text-muted-foreground'>
-              Target: <span className='font-medium'>{assignment.kpiTarget}</span>
+              Target:{' '}
+              <span className='font-medium'>{formatNumber(assignment.kpiTarget)}</span>
             </p>
             <FormField
               control={form.control}
@@ -104,12 +106,11 @@ export function UpdateProgressDialog({
                 <FormItem>
                   <FormLabel>Current Value</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      min={0}
-                      step='any'
-                      {...field}
+                    <NumberInput
                       value={field.value as number | string}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
                     />
                   </FormControl>
                   <FormMessage />

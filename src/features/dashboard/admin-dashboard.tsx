@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatNumber } from '@/lib/utils'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -156,7 +157,7 @@ export function AdminDashboard() {
                         </p>
                       </div>
                       <span className='font-medium tabular-nums'>
-                        {evaluation.kpiScore}
+                        {formatNumber(evaluation.kpiScore)}
                       </span>
                     </li>
                   ))}
